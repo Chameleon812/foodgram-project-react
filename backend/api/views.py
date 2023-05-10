@@ -1,17 +1,33 @@
-import datetime
+from django.utils import timezone
+from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import HttpResponse, get_object_or_404
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
+from rest_framework.decorators import action
 
 
-from .models import Tag, Ingredient, Recipe, Favorite, RecipeIngredient, ShoppingList
-from core.serializers import TagSerializer, IngredientSerializer, RecipeSerializer, RecipeFullSerializer, FavoriteSerializer, ShoppingListSerializer
-from core.filters import IngredientFilter, RecipeFilter
-from core.permissions import IsOwnerOrReadOnly
+from users.models import CustomUser, Follow
+from recipes.models import (
+    Tag, Ingredient, Recipe,
+    Favorite, RecipeIngredient, ShoppingList
+)
+from .serializers import (
+    TagSerializer, IngredientSerializer,
+    RecipeSerializer, RecipeFullSerializer,
+    FavoriteSerializer, ShoppingListSerializer,
+    FollowListSerializer, UserFollowSerializer,
+    CurrentUserSerializer
+)
+from .filters import IngredientFilter, RecipeFilter
+from .permissions import IsOwnerOrReadOnly
+
+
+User = get_user_model()
+
 
 class IngredientView(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
@@ -59,11 +75,7 @@ class FavoriteApiView(APIView):
         }
         serializer = FavoriteSerializer(data=data,
                                         context={'request': request})
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
@@ -123,8 +135,59 @@ class DownloadShoppingCart(APIView):
         main_list = ([f"* {item}:{value['amount']}"
                       f"{value['measurement_unit']}\n"
                       for item, value in shopping_list.items()])
-        today = datetime.date.today()
+        today = timezone.now()
         main_list.append(f'\n From FoodGram with love, {today.year}')
         response = HttpResponse(main_list, 'Content-Type: text/plain')
         response['Content-Disposition'] = 'attachment; filename="BuyList.txt"'
         return response
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = CurrentUserSerializer
+    permission_classes = [AllowAny, ]
+
+    @action(
+        detail=False,
+        methods=['get'],
+        permission_classes=(IsAuthenticated, )
+    )
+    def me(self, request):
+        serializer = self.get_serializer(self.request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class FollowApiView(APIView):
+    permission_classes = [IsAuthenticated, ]
+
+    def get(self, request, following_id):
+        user = request.user
+        data = {
+            'following': following_id,
+            'user': user.id
+        }
+        serializer = UserFollowSerializer(data=data,
+                                          context={'request': request})
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, following_id):
+        user = request.user
+        following = get_object_or_404(CustomUser, id=following_id)
+        Follow.objects.filter(user=user, following=following).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FollowListApiView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, ]
+    serializer_class = FollowListSerializer
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context.update({'request': self.request})
+        return context
+
+    def get_queryset(self):
+        user = self.request.user
+        return CustomUser.objects.filter(following__user=user)

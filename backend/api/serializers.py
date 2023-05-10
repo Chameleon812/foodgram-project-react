@@ -4,10 +4,9 @@ from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
-from recipes.models import Tag
 from recipes.models import (
     Favorite, RecipeIngredient, Recipe,
-    ShoppingList, Ingredient
+    ShoppingList, Ingredient, Tag
 )
 from users.models import Follow
 User = get_user_model()
@@ -93,11 +92,6 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name', 'image', 'text', 'cooking_time'
         )
 
-    def get_ingredients(self, obj):
-        recipe = obj
-        queryset = recipe.recipes_ingredients_list.all()
-        return IngredientAmountSerializer(queryset, many=True).data
-
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
@@ -155,7 +149,6 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         ingredients_data = validated_data.pop('ingredients')
         tags_data = validated_data.pop('tags')
         recipe = Recipe.objects.create(author=request.user, **validated_data)
-        recipe.save()
         recipe.tags.set(tags_data)
         self.create_bulk(recipe, ingredients_data)
         return recipe
@@ -166,9 +159,7 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         tags_data = validated_data.pop('tags')
         RecipeIngredient.objects.filter(recipe=instance).delete()
         self.create_bulk(instance, ingredients_data)
-        instance.name = validated_data.pop('name')
-        instance.text = validated_data.pop('text')
-        instance.cooking_time = validated_data.pop('cooking_time')
+        super().update(instance, validated_data)
         if validated_data.get('image') is not None:
             instance.image = validated_data.pop('image')
         instance.save()
@@ -176,16 +167,20 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
-        ingredients = self.initial_data.get('ingredients')
+        ingredients = self.data.get('ingredients')
         for ingredient in ingredients:
             if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError({
                     'ingredients': ('Число игредиентов должно быть больше 0')
                 })
+            if ingredients.count(ingredient) > 1:
+                raise serializers.ValidationError({
+                    'ingredients': ('Ингридиент повторяется')
+                })
         return data
 
     def validate_cooking_time(self, data):
-        cooking_time = self.initial_data.get('cooking_time')
+        cooking_time = self.data.get('cooking_time')
         if int(cooking_time) <= 0:
             raise serializers.ValidationError(
                 'Время приготовления должно быть больше 0'
@@ -301,9 +296,7 @@ class FollowListSerializer(serializers.ModelSerializer):
             return False
         if other_user.count() == 0:
             return False
-        if Follow.objects.filter(user=user, following=current_user).exists():
-            return True
-        return False
+        return Follow.objects.filter(user=user, following=current_user).exists()
 
     def get_recipes(self, obj):
         recipes = obj.recipes.all()[:3]

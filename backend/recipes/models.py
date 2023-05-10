@@ -3,10 +3,10 @@ from django.core.validators import MinValueValidator, validate_slug
 from django.db.models import (Model, CharField, SlugField, UniqueConstraint,
                               DateTimeField, ImageField, TextField,
                               PositiveSmallIntegerField, ManyToManyField,
-                              ForeignKey, CASCADE, Index)
+                              ForeignKey, CASCADE)
 from django.utils import timezone
 
-from core.validators import (validate_hex, check_user_info)
+from api.validators import (validate_hex, check_user_info)
 
 User = get_user_model()
 
@@ -133,7 +133,9 @@ class Favorite(Model):
 
     class Meta:
         verbose_name = 'Избранное'
-        UniqueConstraint(fields=['recipe', 'user'], name='favorite_unique')
+        constraints = [
+            UniqueConstraint(fields=['recipe', 'user'], name='favorite_unique')
+            ]
 
     def __str__(self):
         return f"{self.user} has favorites: {self.recipe.name}"
@@ -156,6 +158,12 @@ class ShoppingList(Model):
 
     class Meta:
         verbose_name = 'Покупки'
+        constraints = [
+            UniqueConstraint(
+                fields=['recipe', 'user'],
+                name='unique_recipe_cart'
+            )
+        ]
 
     def __str__(self):
         return f'In {self.user} shopping list: {self.recipe}'
