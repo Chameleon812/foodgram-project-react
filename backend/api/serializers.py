@@ -9,6 +9,7 @@ from recipes.models import (
     ShoppingList, Ingredient, Tag
 )
 from users.models import Follow
+
 User = get_user_model()
 
 
@@ -167,7 +168,7 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         return instance
 
     def validate(self, data):
-        ingredients = self.data.get('ingredients')
+        ingredients = data.get('ingredients')
         for ingredient in ingredients:
             if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError({
@@ -180,7 +181,7 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         return data
 
     def validate_cooking_time(self, data):
-        cooking_time = self.data.get('cooking_time')
+        cooking_time = data.get('cooking_time')
         if int(cooking_time) <= 0:
             raise serializers.ValidationError(
                 'Время приготовления должно быть больше 0'

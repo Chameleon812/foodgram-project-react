@@ -17,9 +17,9 @@ router.register('tags', TagView, basename='tags')
 
 urlpatterns = [
     path('', include(router.urls)),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
-        'api/schema/redoc/',
+        'schema/redoc/',
         SpectacularRedocView.as_view(url_name='schema'),
         name='redoc'
     ),
@@ -28,13 +28,25 @@ urlpatterns = [
         DownloadShoppingCart.as_view(),
         name='download_shoppong_cart'
     ),
-    path('recipes/<int:favorite_id>/favorite/', FavoriteApiView.as_view()),
-    path('recipes/<int:recipe_id>/shopping_cart/', ShoppingView.as_view()),
+    path(
+        'recipes/<int:favorite_id>/favorite/',
+        FavoriteApiView.as_view(),
+        name='favorite'
+    ),
+    path(
+        'recipes/<int:recipe_id>/shopping_cart/',
+        ShoppingView.as_view(),
+        name='shop_cart'
+    ),
     path(
         'users/subscriptions/',
         FollowListApiView.as_view(),
         name='follow_list'
     ),
-    path('auth/', include('djoser.urls.authtoken')),
-    path('users/<int:following_id>/subscribe/', FollowApiView.as_view()),
+    path('auth/', include('djoser.urls.authtoken'), name='auth'),
+    path(
+        'users/<int:following_id>/subscribe/',
+        FollowApiView.as_view(),
+        name='follow_list'
+    ),
 ]

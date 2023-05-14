@@ -8,6 +8,8 @@ from rest_framework.views import APIView
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
+from rest_framework.serializers import ModelSerializer
+from django.db.models import Count
 
 
 from users.models import CustomUser, Follow
@@ -64,7 +66,19 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return context
 
 
-class FavoriteApiView(APIView):
+class FavoriteShopDelMixin:
+    def delete(self, request, obj_id):
+        if type(self) is FavoriteApiView:
+            mod = Favorite
+        if type(self) is ShoppingView:
+            mod = ShoppingList
+        user = request.user
+        recipe = get_object_or_404(Recipe, id=obj_id)
+        mod.objects.filter(user=user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class FavoriteApiView(FavoriteShopDelMixin, APIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, favorite_id):
@@ -79,14 +93,8 @@ class FavoriteApiView(APIView):
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def delete(self, request, favorite_id):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=favorite_id)
-        Favorite.objects.filter(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
-
-class ShoppingView(APIView):
+class ShoppingView(FavoriteShopDelMixin, APIView):
     permission_classes = [IsAuthenticated, ]
 
     def get(self, request, recipe_id):
@@ -98,19 +106,9 @@ class ShoppingView(APIView):
         context = {'request': request}
         serializer = ShoppingListSerializer(data=data,
                                             context=context)
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
+        serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def delete(self, request, recipe_id):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        ShoppingList.objects.filter(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class DownloadShoppingCart(APIView):
@@ -120,18 +118,21 @@ class DownloadShoppingCart(APIView):
         shopping_list = {}
         ingredients = RecipeIngredient.objects.filter(
             recipe__purchases__user=request.user
-        )
+            ).values(
+                     'name',
+                     'measurement_unit'
+            ).annotate(
+                      amount=sum('amount')
+            )
         for ingredient in ingredients:
             amount = ingredient.amount
-            name = ingredient.ingredient.name
-            measurement_unit = ingredient.ingredient.measurement_unit
+            name = ingredient.name
+            measurement_unit = ingredient.measurement_unit
             if name not in shopping_list:
                 shopping_list[name] = {
                     'measurement_unit': measurement_unit,
                     'amount': amount
                 }
-            else:
-                shopping_list[name]['amount'] += amount
         main_list = ([f"* {item}:{value['amount']}"
                       f"{value['measurement_unit']}\n"
                       for item, value in shopping_list.items()])
