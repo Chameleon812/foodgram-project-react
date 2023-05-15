@@ -9,14 +9,13 @@ from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
 from rest_framework.serializers import ModelSerializer
-from django.db.models import Count
-
 
 from users.models import CustomUser, Follow
 from recipes.models import (
     Tag, Ingredient, Recipe,
     Favorite, RecipeIngredient, ShoppingList
 )
+from .mixins import FavoriteShopDelGetMixin
 from .serializers import (
     TagSerializer, IngredientSerializer,
     RecipeSerializer, RecipeFullSerializer,
@@ -66,49 +65,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return context
 
 
-class FavoriteShopDelMixin:
-    def delete(self, request, obj_id):
-        if type(self) is FavoriteApiView:
-            mod = Favorite
-        if type(self) is ShoppingView:
-            mod = ShoppingList
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=obj_id)
-        mod.objects.filter(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class FavoriteApiView(FavoriteShopDelMixin, APIView):
+class FavoriteApiView(FavoriteShopDelGetMixin, APIView):
     permission_classes = [IsAuthenticated, ]
-
-    def get(self, request, favorite_id):
-        user = request.user
-        data = {
-            'recipe': favorite_id,
-            'user': user.id
-        }
-        serializer = FavoriteSerializer(data=data,
-                                        context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    model = Favorite
+    serializer = FavoriteSerializer
 
 
-class ShoppingView(FavoriteShopDelMixin, APIView):
+class ShoppingView(FavoriteShopDelGetMixin, APIView):
     permission_classes = [IsAuthenticated, ]
-
-    def get(self, request, recipe_id):
-        user = request.user
-        data = {
-            'recipe': recipe_id,
-            'user': user.id
-        }
-        context = {'request': request}
-        serializer = ShoppingListSerializer(data=data,
-                                            context=context)
-        serializer.is_valid(raise_exception=True)
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
+    model = ShoppingList
+    serializer = ShoppingListSerializer
 
 
 class DownloadShoppingCart(APIView):
@@ -122,10 +88,10 @@ class DownloadShoppingCart(APIView):
                      'name',
                      'measurement_unit'
             ).annotate(
-                      amount=sum('amount')
+                      ing_amount=sum('amount')
             )
         for ingredient in ingredients:
-            amount = ingredient.amount
+            amount = ingredient.ing_amount
             name = ingredient.name
             measurement_unit = ingredient.measurement_unit
             if name not in shopping_list:
