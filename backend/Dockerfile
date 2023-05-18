@@ -1,10 +1,10 @@
 FROM python:3.9.0 
  
-WORKDIR /code 
+WORKDIR /app 
 
 COPY . .
 
-RUN pip install --upgrade pip && pip install -r /code/requirements.txt
+RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
 ADD django_entrypoint.sh /django_entrypoint.sh
 
