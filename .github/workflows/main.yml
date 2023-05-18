@@ -64,7 +64,7 @@ jobs:
             with:
               push: true
               context: frontend/
-              tags: ${{ secrets.DOCKER_USER }}/infra_frontend_1:latest
+              tags: ${{ secrets.DOCKER_USERNAME }}/infra_frontend_1:latest
 
     deploy:
       runs-on: ubuntu-latest
