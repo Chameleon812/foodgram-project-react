@@ -1,20 +1,5 @@
 #!/bin/sh
 
-set -o errexit
-set -o pipefail
-set -o nounset
-
-if [ "$POSTGRES_USER" = "postgres" ]; then
-    echo "Waiting for PostgreSQL to become available..."
-
-    while ! nc -z $DB_HOST $DB_PORT; do
-      sleep 0.1
-    done
-
-    echo "PostgreSQL is available"
-fi
-
-
 python manage.py makemigrations
 
 echo "Making migrations."
