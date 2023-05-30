@@ -1,13 +1,14 @@
-FROM python:3.9.0 
- 
-WORKDIR /app 
+FROM python:3.9.0
+
+WORKDIR /app
 
 COPY . .
 
 RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
-ADD django_entrypoint.sh /django_entrypoint.sh
+RUN echo "Loading demo data." \
+    && python manage.py loaddata -i dump.json \
+    && echo "Collecting static files." \
+    && python manage.py collectstatic --noinput
 
-RUN chmod a+x /django_entrypoint.sh
-
-ENTRYPOINT ["/django_entrypoint.sh"]
+CMD gunicorn -w 2 -b 0:8000 foodgram.wsgi
