@@ -6,10 +6,9 @@ COPY . .
 
 RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
-ADD django_entrypoint.sh /django_entrypoint.sh
+RUN echo "Loading demo data." \
+    && python manage.py loaddata -i dump.json \
+    && echo "Collecting static files." \
+    && python manage.py collectstatic --noinput
 
-RUN chmod a+x /django_entrypoint.sh
-
-ENTRYPOINT ["/django_entrypoint.sh"] 
-
- # CMD gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
+CMD gunicorn foodgram.wsgi:application --bind 0.0.0.0:8000
