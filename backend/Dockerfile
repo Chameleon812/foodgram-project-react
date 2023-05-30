@@ -6,7 +6,8 @@ COPY . .
 
 RUN pip install --upgrade pip && pip install -r /app/requirements.txt
 
-RUN python manage.py loaddata -i dump.json
-RUN python manage.py collectstatic --noinput
+ADD django_entrypoint.sh /django_entrypoint.sh
 
-CMD ["gunicorn", "foodgram.wsgi:application", "--bind", "0.0.0.0:8000"]
+RUN chmod a+x /django_entrypoint.sh
+
+ENTRYPOINT ["/django_entrypoint.sh"]
