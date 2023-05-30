@@ -21,8 +21,6 @@ services:
             - ../frontend/:/app/result_build/
         depends_on:
             - db
-        networks:
-            - djangonetwork
 
     backend:
         image: chameleon812/infra_backend_1:latest
@@ -36,6 +34,9 @@ services:
             - db
         env_file:
             - ./.env
+        networks:
+            - djangonetwork
+
 
     nginx:
         image: nginx:1.19.3
