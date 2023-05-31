@@ -55,6 +55,8 @@ services:
         restart: always
         depends_on:
             - backend
+        networks:
+            - djangonetwork
 networks:
       djangonetwork:
           driver: bridge
