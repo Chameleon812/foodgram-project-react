@@ -41,8 +41,8 @@ services:
         ports:
             - 80:80
         volumes:
-            - static_value:/usr/share/nginx/html/
-            - media_value:/usr/share/nginx/html/
+            - static_value:/usr/share/nginx/html/static/
+            - media_value:/usr/share/nginx/html/media/
             - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
             - ./frontend/build:/usr/share/nginx/html/
             - ./docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
