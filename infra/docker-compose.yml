@@ -25,8 +25,6 @@ services:
     backend:
         image: chameleon812/infra_backend_1:latest
         restart: always
-        ports: 
-            - 8000:8000
         volumes:
             - static_value:/app/static/
             - media_value:/app/media/
@@ -55,6 +53,7 @@ services:
         restart: always
         depends_on:
             - backend
+            - frontend
         networks:
             - djangonetwork
 networks:
