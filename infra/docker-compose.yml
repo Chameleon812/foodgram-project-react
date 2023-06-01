@@ -26,8 +26,8 @@ services:
         image: chameleon812/infra_backend_1:latest
         restart: always
         volumes:
-            - static_value:/usr/share/nginx/html/static
-            - media_value:/usr/share/nginx/html/static
+            - static_value:/app/static/
+            - media_value:/app/media/
         depends_on:
             - db
         env_file:
@@ -41,8 +41,8 @@ services:
         ports:
             - 80:80
         volumes:
-            - static_value:/var/html/static/
-            - media_value:/var/html/media/
+            - static_value:/usr/share/nginx/html/
+            - media_value:/usr/share/nginx/html/
             - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
             - ./frontend/build:/usr/share/nginx/html/
             - ./docs/redoc.html:/usr/share/nginx/html/api/docs/redoc.html
