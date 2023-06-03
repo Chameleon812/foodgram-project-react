@@ -14,9 +14,9 @@ router = DefaultRouter()
 router.register('recipes', RecipeViewSet)
 router.register(r'ingredients', IngredientView, basename='ingredients')
 router.register('tags', TagView, basename='tags')
-
 urlpatterns = [
     path('', include(router.urls)),
+    path('users/', include('djoser.urls')),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
         'schema/redoc/',
