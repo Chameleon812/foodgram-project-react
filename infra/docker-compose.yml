@@ -14,13 +14,6 @@ services:
             - ./.env
         networks:
             - djangonetwork
-    
-    frontend:
-        image: chameleon812/infra_frontend_1:latest
-        volumes:
-            - frontend/:/app/build
-        depends_on:
-            - db
 
     backend:
         image: chameleon812/infra_backend_1:latest
@@ -34,6 +27,14 @@ services:
             - ./.env
         networks:
             - djangonetwork
+
+    frontend:
+        image: chameleon812/infra_frontend_1:latest
+        volumes:
+            - frontend/:/app/build
+        depends_on:
+            - db
+            - backend
 
     nginx:
         image: nginx:1.19.3
