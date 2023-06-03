@@ -180,13 +180,6 @@ class RecipeFullSerializer(serializers.ModelSerializer):
                 })
         return data
 
-    def validate_cooking_time(self, data):
-        cooking_time = data.get('cooking_time')
-        if int(cooking_time) <= 0:
-            raise serializers.ValidationError(
-                'Время приготовления должно быть больше 0'
-            )
-        return data
 
     def to_representation(self, instance):
         data = RecipeSerializer(
