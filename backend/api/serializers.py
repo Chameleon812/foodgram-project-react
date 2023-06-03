@@ -93,6 +93,11 @@ class RecipeSerializer(serializers.ModelSerializer):
             'name', 'image', 'text', 'cooking_time'
         )
 
+    def get_ingredients(self, obj):
+        recipe = obj
+        queryset = recipe.recipes_ingredients_list.all()
+        return IngredientAmountSerializer(queryset, many=True).data
+
     def get_is_favorited(self, obj):
         request = self.context.get('request')
         if request is None or request.user.is_anonymous:
