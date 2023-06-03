@@ -49,4 +49,5 @@ urlpatterns = [
         FollowApiView.as_view(),
         name='follow_list'
     ),
+    path('users/', include('djoser.urls')),
 ]
