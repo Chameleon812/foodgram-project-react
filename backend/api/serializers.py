@@ -180,7 +180,6 @@ class RecipeFullSerializer(serializers.ModelSerializer):
                 })
         return data
 
-
     def to_representation(self, instance):
         data = RecipeSerializer(
             instance,
