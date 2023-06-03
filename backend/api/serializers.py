@@ -95,7 +95,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_ingredients(self, obj):
         recipe = obj
-        queryset = recipe.recipes_ingredients_list.all()
+        queryset = recipe.ingredients()
         return IngredientAmountSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
