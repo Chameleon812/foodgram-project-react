@@ -174,13 +174,13 @@ class RecipeIngredient(Model):
         Recipe,
         verbose_name='recipe',
         on_delete=CASCADE,
-        related_name='recipe_ingredients'
+        related_name='ingredients_in_recipe'
     )
     ingredient = ForeignKey(
         Ingredient,
         verbose_name='ingredient',
         on_delete=CASCADE,
-        related_name='ingredient_recipes'
+        related_name='recipes_ingredients_list'
     )
     amount = PositiveSmallIntegerField(
         verbose_name='amount',
