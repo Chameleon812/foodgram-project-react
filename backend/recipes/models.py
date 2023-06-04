@@ -94,13 +94,13 @@ class Recipe(Model):
         verbose_name='ingredients',
         blank=True,
         through='RecipeIngredient',
-        related_name='recipes',
+        related_name='ingredients',
     )
     tags = ManyToManyField(
         Tag,
         verbose_name='tags',
         blank=True,
-        related_name='recipes',
+        related_name='tags',
     )
     author = ForeignKey(
         User,
