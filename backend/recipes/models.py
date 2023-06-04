@@ -180,7 +180,7 @@ class RecipeIngredient(Model):
         Ingredient,
         verbose_name='ingredient',
         on_delete=CASCADE,
-        related_name='recipes_ingredients_list'
+        related_name='recipe_ingredients_list'
     )
     amount = PositiveSmallIntegerField(
         verbose_name='amount',
