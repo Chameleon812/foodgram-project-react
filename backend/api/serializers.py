@@ -1,5 +1,6 @@
 from django.db import transaction
 from django.contrib.auth import get_user_model
+from django.db.models import F
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
@@ -94,9 +95,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         )
 
     def get_ingredients(self, obj):
-        recipe = obj
-        queryset = recipe.recipes_ingredients_list.all()
-        return IngredientAmountSerializer(queryset, many=True).data
+        ingredients = obj.ingredients.values(
+            'id', 'name', 'measurement_unit', amount=F('recipe__amount')
+        )
+        return ingredients
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
