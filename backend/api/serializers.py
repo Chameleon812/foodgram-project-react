@@ -29,7 +29,7 @@ class TagSerializer(serializers.ModelSerializer):
         extra_kwargs = {'url': {'lookup_field': 'id'}}
 
 
-class IngredientAmountSerializer(serializers.ModelSerializer):
+class RecipeIngredientAmountSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(source='ingredient',
                                             read_only=True)
     name = serializers.SlugRelatedField(slug_field='name',
@@ -97,7 +97,7 @@ class RecipeSerializer(serializers.ModelSerializer):
     def get_ingredients(self, obj):
         recipe = obj
         queryset = recipe.recipes_ingredients_list.all()
-        return IngredientAmountSerializer(queryset, many=True).data
+        return RecipeIngredientAmountSerializer(queryset, many=True).data
 
     def get_is_favorited(self, obj):
         request = self.context.get('request')
