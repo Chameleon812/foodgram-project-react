@@ -54,9 +54,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
     filterset_class = RecipeFilter
 
     def get_serializer_class(self):
-        if self.request.method in ('POST', 'PUT', 'PATCH'):
-            return RecipeFullSerializer
-        return print(self.request.method)
+        if self.request.method not in ('POST', 'PUT', 'PATCH'):
+            return RecipeSerializer
+        return RecipeFullSerializer
 
     def get_serializer_context(self):
         context = super().get_serializer_context()
