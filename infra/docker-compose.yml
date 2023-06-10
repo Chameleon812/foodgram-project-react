@@ -41,7 +41,7 @@ services:
         ports:
             - 80:80
         volumes:
-            - media_value:/var/www/be/media_n/
+            - media_value:/var/www/be/media_n
             - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
             - frontend:/var/www/fe
             - backend:/var/www/be/static
