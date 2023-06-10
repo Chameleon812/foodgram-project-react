@@ -121,11 +121,6 @@ class RecipeImageSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
 
-    def get_image(self, obj):
-        request = self.context.get('request')
-        image_url = obj.image.url
-        return request.build_absolute_uri(image_url)
-
 
 class RecipeFullSerializer(serializers.ModelSerializer):
     image = Base64ImageField(use_url=True, max_length=None)
