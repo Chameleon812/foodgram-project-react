@@ -47,6 +47,6 @@ urlpatterns = [
     path(
         'users/<int:following_id>/subscribe/',
         FollowApiView.as_view(),
-        name='follow_list'
+        name='following'
     ),
 ]
