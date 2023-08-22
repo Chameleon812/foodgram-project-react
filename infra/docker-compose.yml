@@ -19,7 +19,7 @@ services:
         image: chameleon812/infra_backend_1:latest
         restart: always
         volumes:
-            - media_value:/app/media
+            - media_value:/var/www/be/media/
             - backend:/app/static
         depends_on:
             - db
@@ -41,7 +41,7 @@ services:
         ports:
             - 80:80
         volumes:
-            - media_value:/var/www/be/media
+            - media_value:/var/www/be/media/
             - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
             - frontend:/var/www/fe
             - backend:/var/www/be/static
