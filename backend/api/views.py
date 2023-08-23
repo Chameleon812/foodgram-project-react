@@ -164,7 +164,7 @@ class UserViewSet(viewsets.ModelViewSet):
 class FollowApiView(APIView):
     permission_classes = [IsAuthenticated, ]
 
-    def get(self, request, following_id):
+    def post(self, request, following_id):
         user = request.user
         data = {
             'following': following_id,
