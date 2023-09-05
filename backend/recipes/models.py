@@ -127,12 +127,9 @@ class Favorite(Model):
         Recipe, related_name='favorites',
         on_delete=CASCADE
     )
-    added = DateTimeField(
-        auto_now_add=True, verbose_name='Дата добавления в избранное'
-    )
 
     class Meta:
-        verbose_name = 'Избранное'
+        verbose_name = 'Favorite'
         constraints = [
             UniqueConstraint(fields=['recipe', 'user'], name='favorite_unique')
             ]

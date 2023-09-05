@@ -64,29 +64,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return context
 
 
-class FavoriteApiView(APIView):
-    permission_classes = [IsAuthenticated, ]
+class FavoriteViewSet(viewsets.ModelViewSet):
+    http_method_names = ['post', 'delete']
+    queryset = Favorite.objects.all()
+    serializer_class = FavoriteSerializer
+    permission_classes = (IsAuthenticated,)
 
-    def get(self, request, favorite_id):
+    def delete(self, request, *args, **kwargs):
+        recipe_id = kwargs.get("id", None)
+        recipe = get_object_or_404(Recipe, id=recipe_id)
         user = request.user
-        data = {
-            'recipe': favorite_id,
-            'user': user.id
-        }
-        serializer = FavoriteSerializer(data=data,
-                                        context={'request': request})
-        if not serializer.is_valid():
-            return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def delete(self, request, favorite_id):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=favorite_id)
-        Favorite.objects.filter(user=user, recipe=recipe).delete()
+        get_object_or_404(Favorite, user_id=user.id,
+                          recipe_id=recipe.id).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
