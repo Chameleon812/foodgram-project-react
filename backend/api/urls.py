@@ -4,7 +4,7 @@ from drf_spectacular.views import (
 )
 from rest_framework.routers import DefaultRouter
 
-from .views import (DownloadShoppingCart, FavoriteApiView, RecipeViewSet, 
+from .views import (DownloadShoppingCart, FavoriteViewSet, RecipeViewSet, 
                     ShoppingView, IngredientView, TagView, FollowApiView,
                     FollowListApiView)
 
@@ -30,7 +30,7 @@ urlpatterns = [
     ),
     path(
         'recipes/<int:favorite_id>/favorite/',
-        FavoriteApiView.as_view(),
+        FavoriteViewSet.as_view(),
         name='favorite'
     ),
     path(
