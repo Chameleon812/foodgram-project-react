@@ -30,7 +30,7 @@ urlpatterns = [
     ),
     path(
         'recipes/<int:favorite_id>/favorite/',
-        FavoriteViewSet.as_view(),
+        FavoriteViewSet.as_view({'post': 'create', 'delete': 'delete'}),
         name='favorite'
     ),
     path(
