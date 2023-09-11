@@ -87,13 +87,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(status=HTTP_204_NO_CONTENT)
 
     @action(
-        methods=('get', 'delete',),
+        methods=('post', 'delete',),
         detail=True,
         permission_classes=(IsAuthenticated,)
     )
     def favorite(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
-        if request.method == 'GET':
+        if request.method == 'POST':
             return self.add_to_favorite(request, recipe)
         return self.delete_from_favorite(request, recipe)
 
