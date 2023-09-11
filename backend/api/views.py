@@ -18,9 +18,8 @@ from recipes.models import (
 from .serializers import (
     TagSerializer, IngredientSerializer,
     RecipeSerializer, RecipeFullSerializer,
-    FavoriteSerializer, ShoppingListSerializer,
     FollowListSerializer, UserFollowSerializer,
-    CurrentUserSerializer
+    CurrentUserSerializer, RecipeImageSerializer
 )
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsOwnerOrReadOnly
@@ -62,77 +61,119 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context.update({'request': self.request})
         return context
-
-
-class FavoriteViewSet(viewsets.ModelViewSet):
-    http_method_names = ['post', 'delete']
-    queryset = Favorite.objects.all()
-    serializer_class = FavoriteSerializer
-    permission_classes = (IsAuthenticated,)
-
-    def delete(self, request, *args, **kwargs):
-        recipe_id = kwargs.get("id", None)
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        user = request.user
-        get_object_or_404(Favorite, user_id=user.id,
-                          recipe_id=recipe.id).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class ShoppingView(APIView):
-    permission_classes = [IsAuthenticated, ]
-
-    def get(self, request, recipe_id):
-        user = request.user
-        data = {
-            'recipe': recipe_id,
-            'user': user.id
-        }
-        context = {'request': request}
-        serializer = ShoppingListSerializer(data=data,
-                                            context=context)
-        if not serializer.is_valid():
+    
+    def add_to_favorite(self, request, recipe):
+        try:
+            Favorite.objects.create(user=request.user, recipe=recipe)
+        except IntegrityError:
             return Response(
-                serializer.errors,
-                status=status.HTTP_400_BAD_REQUEST
+                {'error'},
+                status=HTTP_400_BAD_REQUEST,
             )
-        serializer.save()
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def delete(self, request, recipe_id):
-        user = request.user
-        recipe = get_object_or_404(Recipe, id=recipe_id)
-        ShoppingList.objects.filter(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class DownloadShoppingCart(APIView):
-    permission_classes = [IsAuthenticated, ]
-
-    def get(self, request):
-        shopping_list = {}
-        ingredients = RecipeIngredient.objects.filter(
-            recipe__purchases__user=request.user
+        serializer = RecipeImageSerializer(recipe)
+        return Response(
+            serializer.data,
+            status=HTTP_201_CREATED,
         )
+
+    def delete_from_favorite(self, request, recipe):
+        favorite = Favorite.objects.filter(user=request.user, recipe=recipe)
+        if not favorite.exists():
+            return Response(
+                {'error'},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        favorite.delete()
+        return Response(status=HTTP_204_NO_CONTENT)
+
+    @action(
+        methods=('get', 'delete',),
+        detail=True,
+        permission_classes=(IsAuthenticated,)
+    )
+    def favorite(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        if request.method == 'GET':
+            return self.add_to_favorite(request, recipe)
+        return self.delete_from_favorite(request, recipe)
+
+class ShoppingListViewSet(viewsets.GenericViewSet):
+    NAME = 'ingredients__ingredient__name'
+    MEASUREMENT_UNIT = 'ingredients__ingredient__measurement_unit'
+    permission_classes = (IsAuthenticated,)
+    serializer_class = RecipeImageSerializer
+    queryset = ShoppingList.objects.all()
+    http_method_names = ('get', 'delete',)
+
+    def generate_shopping_list_data(self, request):
+        recipes = (
+            request.user.shopping_list.recipes.prefetch_related('ingredients')
+        )
+        return (
+            recipes.order_by(self.NAME)
+            .values(self.NAME, self.MEASUREMENT_UNIT)
+            .annotate(total=Sum('ingredients__amount'))
+        )
+
+    def generate_ingredients_content(self, ingredients):
+        content = ''
         for ingredient in ingredients:
-            amount = ingredient.amount
-            name = ingredient.ingredient.name
-            measurement_unit = ingredient.ingredient.measurement_unit
-            if name not in shopping_list:
-                shopping_list[name] = {
-                    'measurement_unit': measurement_unit,
-                    'amount': amount
-                }
-            else:
-                shopping_list[name]['amount'] += amount
-        main_list = ([f"* {item}:{value['amount']}"
-                      f"{value['measurement_unit']}\n"
-                      for item, value in shopping_list.items()])
-        today = datetime.date.today()
-        main_list.append(f'\n From FoodGram with love, {today.year}')
-        response = HttpResponse(main_list, 'Content-Type: text/plain')
-        response['Content-Disposition'] = 'attachment; filename="BuyList.txt"'
+            content += (
+                f'{ingredient[self.NAME]}'
+                f' ({ingredient[self.MEASUREMENT_UNIT]})'
+                f' — {ingredient["total"]}\r\n'
+            )
+        return content
+
+    @action(detail=False)
+    def download_shopping_list(self, request):
+        try:
+            ingredients = self.generate_shopping_list_data(request)
+        except ShoppingList.DoesNotExist:
+            return Response(
+                {'Shopping list doesnt exist'},
+                status=HTTP_400_BAD_REQUEST
+            )
+        content = self.generate_ingredients_content(ingredients)
+        response = HttpResponse(
+            content, content_type='text/plain,charset=utf8'
+        )
+        response['Content-Disposition'] = f'attachment; filename={FILE_NAME}'
         return response
+
+    def add_to_shopping_list(self, request, recipe, shopping_list):
+        if shopping_list.recipes.filter(pk__in=(recipe.pk,)).exists():
+            return Response(
+                {'Cannot added twice'},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        shopping_list.recipes.add(recipe)
+        serializer = self.get_serializer(recipe)
+        return Response(
+            serializer.data,
+            status=HTTP_201_CREATED,
+        )
+
+    def remove_from_shopping_list(self, request, recipe, shopping_list):
+        if not shopping_list.recipes.filter(pk__in=(recipe.pk,)).exists():
+            return Response(
+                {'Cannot delete'},
+                status=HTTP_400_BAD_REQUEST,
+            )
+        shopping_list.recipes.remove(recipe)
+        return Response(
+            status=HTTP_204_NO_CONTENT,
+        )
+
+    @action(methods=('get', 'delete',), detail=True)
+    def shopping_list(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        shopping_list = (
+            ShoppingList.objects.get_or_create(user=request.user)[0]
+        )
+        if request.method == 'GET':
+            return self.add_to_shopping_list(request, recipe, shopping_list)
+        return self.remove_from_shopping_list(request, recipe, shopping_list)
 
 
 class UserViewSet(viewsets.ModelViewSet):

@@ -191,47 +191,6 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         return data
 
 
-class FavoriteSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = Favorite
-        fields = ('user', 'recipe')
-        validators = [
-            UniqueTogetherValidator(
-                queryset=Favorite.objects.all(),
-                fields=('user', 'recipe'),
-                message='Рецепт уже добавлен в избранное'
-            )
-        ]
-
-    def to_representation(self, instance):
-        requset = self.context.get('request')
-        return RecipeImageSerializer(
-            instance.recipe,
-            context={'request': requset}
-        ).data
-
-
-class ShoppingListSerializer(FavoriteSerializer):
-    class Meta(FavoriteSerializer.Meta):
-        model = ShoppingList
-        fields = '__all__'
-        validators = [
-            UniqueTogetherValidator(
-                queryset=ShoppingList.objects.all(),
-                fields=('user', 'recipe'),
-                message='Рецепт уже добавлен в список покупок'
-            )
-        ]
-
-    def to_representation(self, instance):
-        requset = self.context.get('request')
-        return RecipeImageSerializer(
-            instance.recipe,
-            context={'request': requset}
-        ).data
-
-
 class UserFollowSerializer(serializers.ModelSerializer):
 
     following = serializers.SlugRelatedField(

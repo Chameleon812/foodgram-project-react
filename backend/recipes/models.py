@@ -154,7 +154,7 @@ class ShoppingList(Model):
     )
 
     class Meta:
-        verbose_name = 'Покупки'
+        verbose_name = 'Sopping list'
         constraints = [
             UniqueConstraint(
                 fields=['recipe', 'user'],

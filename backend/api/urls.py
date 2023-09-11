@@ -4,14 +4,15 @@ from drf_spectacular.views import (
 )
 from rest_framework.routers import DefaultRouter
 
-from .views import (DownloadShoppingCart, FavoriteViewSet, RecipeViewSet, 
-                    ShoppingView, IngredientView, TagView, FollowApiView,
+from .views import (RecipeViewSet, 
+                    ShoppingListViewSet, IngredientView, TagView, FollowApiView,
                     FollowListApiView)
 
 app_name = 'api'
 router = DefaultRouter()
 
-router.register('recipes', RecipeViewSet)
+router.register(r'recipes', RecipeViewSet,  basename='recipes')
+router.register(r'recipes', ShoppingListViewSet, basename='shopping_cart')
 router.register(r'ingredients', IngredientView, basename='ingredients')
 router.register('tags', TagView, basename='tags')
 urlpatterns = [
@@ -22,21 +23,6 @@ urlpatterns = [
         'schema/redoc/',
         SpectacularRedocView.as_view(url_name='schema'),
         name='redoc'
-    ),
-    path(
-        'recipes/download_shopping_cart/',
-        DownloadShoppingCart.as_view(),
-        name='download_shoppong_cart'
-    ),
-    path(
-        'recipes/<int:favorite_id>/favorite/',
-        FavoriteViewSet.as_view({'post': 'create', 'delete': 'delete'}),
-        name='favorite'
-    ),
-    path(
-        'recipes/<int:recipe_id>/shopping_cart/',
-        ShoppingView.as_view(),
-        name='shop_cart'
     ),
     path(
         'users/subscriptions/',
