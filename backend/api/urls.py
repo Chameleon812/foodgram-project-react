@@ -12,7 +12,6 @@ app_name = 'api'
 router = DefaultRouter()
 
 router.register(r'recipes', RecipeViewSet,  basename='recipes')
-router.register(r'recipes', ShoppingListViewSet, basename='shopping_list')
 router.register(r'ingredients', IngredientView, basename='ingredients')
 router.register('tags', TagView, basename='tags')
 urlpatterns = [
