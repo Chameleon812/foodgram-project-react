@@ -1,7 +1,9 @@
-import datetime
+from django.db import IntegrityError
+from django.db.models import Sum
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import HttpResponse, get_object_or_404
+from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status, viewsets, generics
 from rest_framework.views import APIView
@@ -68,12 +70,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
         except IntegrityError:
             return Response(
                 {'error'},
-                status=HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         serializer = RecipeImageSerializer(recipe)
         return Response(
             serializer.data,
-            status=HTTP_201_CREATED,
+            status=status.HTTP_201_CREATED,
         )
 
     def delete_from_favorite(self, request, recipe):
@@ -81,10 +83,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if not favorite.exists():
             return Response(
                 {'error'},
-                status=HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         favorite.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     @action(
         methods=('post', 'delete',),
@@ -96,6 +98,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if request.method == 'POST':
             return self.add_to_favorite(request, recipe)
         return self.delete_from_favorite(request, recipe)
+
 
 class ShoppingListViewSet(viewsets.GenericViewSet):
     NAME = 'ingredients__ingredient__name'
@@ -132,37 +135,37 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
         except ShoppingList.DoesNotExist:
             return Response(
                 {'Shopping list doesnt exist'},
-                status=HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST
             )
         content = self.generate_ingredients_content(ingredients)
         response = HttpResponse(
             content, content_type='text/plain,charset=utf8'
         )
-        response['Content-Disposition'] = f'attachment; filename={FILE_NAME}'
+        response['Content-Disposition'] = 'attachment; filename=shopping_cart.txt'
         return response
 
     def add_to_shopping_list(self, request, recipe, shopping_list):
         if shopping_list.recipes.filter(pk__in=(recipe.pk,)).exists():
             return Response(
                 {'Cannot added twice'},
-                status=HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         shopping_list.recipes.add(recipe)
         serializer = self.get_serializer(recipe)
         return Response(
             serializer.data,
-            status=HTTP_201_CREATED,
+            status=status.HTTP_201_CREATED,
         )
 
     def remove_from_shopping_list(self, request, recipe, shopping_list):
         if not shopping_list.recipes.filter(pk__in=(recipe.pk,)).exists():
             return Response(
                 {'Cannot delete'},
-                status=HTTP_400_BAD_REQUEST,
+                status=status.HTTP_400_BAD_REQUEST,
             )
         shopping_list.recipes.remove(recipe)
         return Response(
-            status=HTTP_204_NO_CONTENT,
+            status=status.HTTP_204_NO_CONTENT,
         )
 
     @action(methods=('get', 'delete',), detail=True)
