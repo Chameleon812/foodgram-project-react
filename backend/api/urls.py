@@ -5,7 +5,7 @@ from drf_spectacular.views import (
 from rest_framework.routers import DefaultRouter
 
 from .views import (RecipeViewSet,
-                    ShoppingListViewSet, IngredientView, TagView, FollowApiView,
+                    ShoppingCartViewSet, IngredientView, TagView, FollowApiView,
                     FollowListApiView)
 
 app_name = 'api'
@@ -25,7 +25,7 @@ urlpatterns = [
     ),
     path(
         r'recipes/(?P<pk>\d+)/shopping_cart',
-        ShoppingListViewSet.as_view(),
+        ShoppingCartViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
         name='shopping_cart'
     ),
     path(

@@ -14,7 +14,7 @@ from rest_framework.decorators import action
 from users.models import CustomUser, Follow
 from recipes.models import (
     Tag, Ingredient, Recipe,
-    Favorite, ShoppingList
+    Favorite, ShoppingCart
 )
 
 from .serializers import (
@@ -100,17 +100,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return self.delete_from_favorite(request, recipe)
 
 
-class ShoppingListViewSet(viewsets.GenericViewSet):
+class ShoppingCartViewSet(viewsets.GenericViewSet):
     NAME = 'ingredients__ingredient__name'
     MEASUREMENT_UNIT = 'ingredients__ingredient__measurement_unit'
     permission_classes = (IsAuthenticated,)
     serializer_class = RecipeImageSerializer
-    queryset = ShoppingList.objects.all()
+    queryset = ShoppingCart.objects.all()
     http_method_names = ('post', 'delete',)
 
-    def generate_shopping_list_data(self, request):
+    def generate_shopping_cart_data(self, request):
         recipes = (
-            request.user.shopping_list.recipes.prefetch_related('ingredients')
+            request.user.shopping_cart.recipes.prefetch_related('ingredients')
         )
         return (
             recipes.order_by(self.NAME)
@@ -129,12 +129,12 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
         return content
 
     @action(detail=False)
-    def download_shopping_card(self, request):
+    def download_shopping_cart(self, request):
         try:
-            ingredients = self.generate_shopping_list_data(request)
-        except ShoppingList.DoesNotExist:
+            ingredients = self.generate_shopping_cart_data(request)
+        except ShoppingCart.DoesNotExist:
             return Response(
-                {'Shopping list doesnt exist'},
+                {'SHOPPING_CART_DOES_NOT_EXISTS'},
                 status=status.HTTP_400_BAD_REQUEST
             )
         content = self.generate_ingredients_content(ingredients)
@@ -144,39 +144,39 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
         response['Content-Disposition'] = 'attachment; filename=shopping_cart.txt'
         return response
 
-    def add_to_shopping_list(self, request, recipe, shopping_list):
-        if shopping_list.recipes.filter(pk__in=(recipe.pk,)).exists():
+    def add_to_shopping_cart(self, request, recipe, shopping_cart):
+        if shopping_cart.recipes.filter(pk__in=(recipe.pk,)).exists():
             return Response(
-                {'Cannot added twice'},
+                {'SHOPPING_CART_RECIPE_CANNOT_ADDED_TWICE'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        shopping_list.recipes.add(recipe)
+        shopping_cart.recipes.add(recipe)
         serializer = self.get_serializer(recipe)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED,
         )
 
-    def remove_from_shopping_list(self, request, recipe, shopping_list):
-        if not shopping_list.recipes.filter(pk__in=(recipe.pk,)).exists():
+    def remove_from_shopping_cart(self, request, recipe, shopping_cart):
+        if not shopping_cart.recipes.filter(pk__in=(recipe.pk,)).exists():
             return Response(
-                {'Cannot delete'},
+                {'SHOPPING_CART_RECIPE_CANNOT_DELETE'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        shopping_list.recipes.remove(recipe)
+        shopping_cart.recipes.remove(recipe)
         return Response(
             status=status.HTTP_204_NO_CONTENT,
         )
 
     @action(methods=('post', 'delete',), detail=True)
-    def shopping_list(self, request, pk=None):
+    def shopping_cart(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
-        shopping_list = (
-            ShoppingList.objects.get_or_create(user=request.user)[0]
+        shopping_cart = (
+            ShoppingCart.objects.get_or_create(user=request.user)[0]
         )
-        if request.method == 'GET':
-            return self.add_to_shopping_list(request, recipe, shopping_list)
-        return self.remove_from_shopping_list(request, recipe, shopping_list)
+        if request.method == 'POST':
+            return self.add_to_shopping_cart(request, recipe, shopping_cart)
+        return self.remove_from_shopping_cart(request, recipe, shopping_cart)
 
 
 class UserViewSet(viewsets.ModelViewSet):

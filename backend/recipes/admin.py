@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.utils.translation import gettext_lazy as _
 
 from recipes.models import (Ingredient, Recipe, Tag,
-                            Favorite, ShoppingList, RecipeIngredient)
+                            Favorite, ShoppingCart, RecipeIngredient)
 
 
 @admin.register(Tag)
@@ -55,7 +55,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
 admin.site.register(Favorite)
 admin.site.register(RecipeIngredient)
-admin.site.register(ShoppingList)
+admin.site.register(ShoppingCart)
 
 
 admin.site.site_title = _('Foodgram admin-zone')

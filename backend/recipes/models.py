@@ -138,10 +138,10 @@ class Favorite(Model):
         return f"{self.user} has favorites: {self.recipe.name}"
 
 
-class ShoppingList(Model):
+class ShoppingCart(Model):
     user = ForeignKey(
         User, on_delete=CASCADE,
-        related_name='user_shopping_list',
+        related_name='user_shopping_cart',
         verbose_name='Пользоавтель'
     )
     recipe = ForeignKey(
@@ -154,7 +154,7 @@ class ShoppingList(Model):
     )
 
     class Meta:
-        verbose_name = 'Sopping list'
+        verbose_name = 'Sopping cart'
         constraints = [
             UniqueConstraint(
                 fields=['recipe', 'user'],
@@ -163,7 +163,7 @@ class ShoppingList(Model):
         ]
 
     def __str__(self):
-        return f'In {self.user} shopping list: {self.recipe}'
+        return f'In {self.user} shopping cart: {self.recipe}'
 
 
 class RecipeIngredient(Model):

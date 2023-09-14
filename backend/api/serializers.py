@@ -6,7 +6,7 @@ from rest_framework.validators import UniqueTogetherValidator
 
 from recipes.models import (
     Favorite, RecipeIngredient, Recipe,
-    ShoppingList, Ingredient, Tag
+    ShoppingCart, Ingredient, Tag
 )
 from users.models import Follow
 
@@ -110,7 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         if request is None or request.user.is_anonymous:
             return False
         user = request.user
-        return ShoppingList.objects.filter(recipe=obj, user=user).exists()
+        return ShoppingCart.objects.filter(recipe=obj, user=user).exists()
 
 
 class RecipeImageSerializer(serializers.ModelSerializer):
