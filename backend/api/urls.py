@@ -4,7 +4,7 @@ from drf_spectacular.views import (
 )
 from rest_framework.routers import DefaultRouter
 
-from .views import (RecipeViewSet, 
+from .views import (RecipeViewSet,
                     ShoppingListViewSet, IngredientView, TagView, FollowApiView,
                     FollowListApiView)
 
@@ -22,6 +22,11 @@ urlpatterns = [
         'schema/redoc/',
         SpectacularRedocView.as_view(url_name='schema'),
         name='redoc'
+    ),
+    path(
+        r'recipes/(?P<pk>\d+)/shopping_cart',
+        ShoppingListViewSet.as_view(),
+        name='shopping_cart'
     ),
     path(
         'users/subscriptions/',

@@ -6,7 +6,7 @@ from django.db.models import (Model, CharField, SlugField, UniqueConstraint,
                               ForeignKey, CASCADE)
 from django.utils import timezone
 
-from api.validators import (validate_hex, check_user_info)
+from api.validators import (validate_hex)
 
 User = get_user_model()
 

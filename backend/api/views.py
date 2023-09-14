@@ -14,7 +14,7 @@ from rest_framework.decorators import action
 from users.models import CustomUser, Follow
 from recipes.models import (
     Tag, Ingredient, Recipe,
-    Favorite, RecipeIngredient, ShoppingList
+    Favorite, ShoppingList
 )
 
 from .serializers import (
@@ -63,7 +63,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         context = super().get_serializer_context()
         context.update({'request': self.request})
         return context
-    
+
     def add_to_favorite(self, request, recipe):
         try:
             Favorite.objects.create(user=request.user, recipe=recipe)
@@ -106,7 +106,7 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
     permission_classes = (IsAuthenticated,)
     serializer_class = RecipeImageSerializer
     queryset = ShoppingList.objects.all()
-    http_method_names = ('get', 'delete',)
+    http_method_names = ('post', 'delete',)
 
     def generate_shopping_list_data(self, request):
         recipes = (
@@ -129,7 +129,7 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
         return content
 
     @action(detail=False)
-    def download_shopping_list(self, request):
+    def download_shopping_card(self, request):
         try:
             ingredients = self.generate_shopping_list_data(request)
         except ShoppingList.DoesNotExist:
@@ -168,7 +168,7 @@ class ShoppingListViewSet(viewsets.GenericViewSet):
             status=status.HTTP_204_NO_CONTENT,
         )
 
-    @action(methods=('get', 'delete',), detail=True)
+    @action(methods=('post', 'delete',), detail=True)
     def shopping_list(self, request, pk=None):
         recipe = get_object_or_404(Recipe, pk=pk)
         shopping_list = (
