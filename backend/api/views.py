@@ -227,4 +227,4 @@ class FollowListApiView(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        return CustomUser.objects.filter(following__user=user)
+        return Follow.objects.filter(following__user=user)
