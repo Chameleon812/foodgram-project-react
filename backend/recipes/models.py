@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, validate_slug
 from django.db.models import (Model, CharField, SlugField, UniqueConstraint,
                               DateTimeField, ImageField, TextField,
-                              PositiveSmallIntegerField, ManyToManyField,
+                              PositiveSmallIntegerField, ManyToManyField, OneToOneField,
                               ForeignKey, CASCADE)
 from django.utils import timezone
 
@@ -139,28 +139,21 @@ class Favorite(Model):
 
 
 class ShoppingCart(Model):
-    user = ForeignKey(
-        User, on_delete=CASCADE,
-        related_name='user_shopping_cart',
-        verbose_name='Пользоавтель'
+    user = OneToOneField(
+        User,
+        on_delete=CASCADE,
+        related_name='shopping_cart',
+        verbose_name='User',
     )
-    recipe = ForeignKey(
-        Recipe, on_delete=CASCADE,
-        related_name='purchases',
-        verbose_name='Покупка'
-    )
-    added = DateTimeField(
-        auto_now_add=True, verbose_name='Дата добавления в список покупок'
+    recipes = ManyToManyField(
+        'recipes.Recipe',
+        related_name='in_shopping_cart',
+        verbose_name='Recipes',
     )
 
     class Meta:
-        verbose_name = 'Sopping cart'
-        constraints = [
-            UniqueConstraint(
-                fields=['recipe', 'user'],
-                name='unique_recipe_cart'
-            )
-        ]
+        verbose_name = 'Shopping cart'
+        verbose_name_plural = 'Shopping carts'
 
     def __str__(self):
         return f'In {self.user} shopping cart: {self.recipe}'

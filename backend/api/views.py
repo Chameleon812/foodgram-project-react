@@ -21,7 +21,8 @@ from .serializers import (
     TagSerializer, IngredientSerializer,
     RecipeSerializer, RecipeFullSerializer,
     FollowListSerializer, UserFollowSerializer,
-    CurrentUserSerializer, RecipeImageSerializer
+    CurrentUserSerializer, RecipeImageSerializer,
+    RecipeShortReadSerializer
 )
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsOwnerOrReadOnly
@@ -72,7 +73,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 {'error'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        serializer = RecipeImageSerializer(recipe)
+        serializer = RecipeShortReadSerializer(recipe)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED,
@@ -99,12 +100,24 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.add_to_favorite(request, recipe)
         return self.delete_from_favorite(request, recipe)
 
+    @action(
+        methods=('get',),
+        detail=False,
+        permission_classes=(IsAuthenticated,)
+    )
+    def favorites(self, request):
+        queryset = Recipe.objects.all()
+        serialized_data = RecipeSerializer(queryset, many=True, context={'request': request}).data
+        favorited_recipes = [item for item in serialized_data if item['is_favorited']]
+
+        return Response(favorited_recipes, status=status.HTTP_200_OK)
+
 
 class ShoppingCartViewSet(viewsets.GenericViewSet):
     NAME = 'ingredients__ingredient__name'
     MEASUREMENT_UNIT = 'ingredients__ingredient__measurement_unit'
     permission_classes = (IsAuthenticated,)
-    serializer_class = RecipeImageSerializer
+    serializer_class = RecipeShortReadSerializer()
     queryset = ShoppingCart.objects.all()
     http_method_names = ('post', 'delete',)
 
@@ -218,13 +231,10 @@ class FollowApiView(APIView):
 
 class FollowListApiView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, ]
-    serializer_class = FollowListSerializer
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        context.update({'request': self.request})
-        return context
+    def get(self, request):
+        queryset = CustomUser.objects.all()
+        serialized_data = CurrentUserSerializer(queryset, many=True, context={'request': request}).data
+        subscriptions = [item for item in serialized_data if item['is_subscribed']]
 
-    def get_queryset(self):
-        user = self.request.user
-        return Follow.objects.filter(following__user=user)
+        return Response(subscriptions, status=status.HTTP_200_OK)

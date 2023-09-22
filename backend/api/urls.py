@@ -15,23 +15,11 @@ router.register(r'recipes', RecipeViewSet,  basename='recipes')
 router.register(r'ingredients', IngredientView, basename='ingredients')
 router.register('tags', TagView, basename='tags')
 urlpatterns = [
-    path('', include(router.urls)),
-    path('', include('djoser.urls')),
     path('schema/', SpectacularAPIView.as_view(), name='schema'),
     path(
         'schema/redoc/',
         SpectacularRedocView.as_view(url_name='schema'),
         name='redoc'
-    ),
-    path(
-        r'recipes/(?P<pk>\d+)/shopping_cart',
-        ShoppingCartViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
-        name='shopping_cart'
-    ),
-    path(
-        'users/subscriptions/',
-        FollowListApiView.as_view(),
-        name='follow_list'
     ),
     path('auth/', include('djoser.urls.authtoken'), name='auth'),
     path(
@@ -39,4 +27,11 @@ urlpatterns = [
         FollowApiView.as_view(),
         name='following'
     ),
+    path(
+        'users/subscriptions/',
+        FollowListApiView.as_view(),
+        name='follow_list'
+    ),
+    path('', include(router.urls)),
+    path('', include('djoser.urls'))
 ]

@@ -9,7 +9,7 @@ class CustomUser(AbstractUser):
     REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     class Meta:
-        verbose_name = 'Subscriber'
+        verbose_name = 'User'
         ordering = ['id']
 
     def __str__(self):
@@ -28,7 +28,7 @@ class Follow(models.Model):
                              related_name='follower')
 
     class Meta:
-        verbose_name = 'Subscriptions'
+        verbose_name = 'Subscription'
         constraints = [
             UniqueConstraint(fields=['following', 'user'],
                              name='follow_unique')

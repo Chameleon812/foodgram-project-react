@@ -45,11 +45,8 @@ class RecipeAdmin(admin.ModelAdmin):
         'pub_date',
         'image',
         'cooking_time',
-        'ingredients_inline',
         'text',
         'tags',
-        'favorites',
-        'shopping_carts'
     )
 
 
