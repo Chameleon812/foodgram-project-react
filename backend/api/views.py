@@ -20,8 +20,8 @@ from recipes.models import (
 from .serializers import (
     TagSerializer, IngredientSerializer,
     RecipeSerializer, RecipeFullSerializer,
-    FollowListSerializer, UserFollowSerializer,
-    CurrentUserSerializer, RecipeImageSerializer,
+    UserFollowSerializer,
+    CurrentUserSerializer,
     RecipeShortReadSerializer
 )
 from .filters import IngredientFilter, RecipeFilter
