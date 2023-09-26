@@ -113,6 +113,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(favorited_recipes, status=status.HTTP_200_OK)
 
 
+
 class ShoppingCartViewSet(viewsets.GenericViewSet):
     NAME = 'ingredients__ingredient__name'
     MEASUREMENT_UNIT = 'ingredients__ingredient__measurement_unit'
