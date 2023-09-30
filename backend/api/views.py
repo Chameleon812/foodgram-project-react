@@ -54,6 +54,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class.page_size = 6
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
+    NAME = 'ingredients__ingredient__name'
+    MEASUREMENT_UNIT = 'ingredients__ingredient__measurement_unit'
 
     def get_serializer_class(self):
         if self.request.method not in ('POST', 'PUT', 'PATCH'):
@@ -112,6 +114,75 @@ class RecipeViewSet(viewsets.ModelViewSet):
 
         return Response(favorited_recipes, status=status.HTTP_200_OK)
 
+    def generate_shopping_cart_data(self, request):
+        recipes = (
+            request.user.shopping_cart.recipes.prefetch_related('ingredients')
+        )
+        return (
+            recipes.order_by(self.NAME)
+            .values(self.NAME, self.MEASUREMENT_UNIT)
+            .annotate(total=Sum('ingredients__amount'))
+        )
+
+    def generate_ingredients_content(self, ingredients):
+        content = ''
+        for ingredient in ingredients:
+            content += (
+                f'{ingredient[self.NAME]}'
+                f' ({ingredient[self.MEASUREMENT_UNIT]})'
+                f' — {ingredient["total"]}\r\n'
+            )
+        return content
+
+    @action(detail=False)
+    def download_shopping_cart(self, request):
+        try:
+            ingredients = self.generate_shopping_cart_data(request)
+        except ShoppingCart.DoesNotExist:
+            return Response(
+                {'SHOPPING_CART_DOES_NOT_EXISTS'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        content = self.generate_ingredients_content(ingredients)
+        response = HttpResponse(
+            content, content_type='text/plain,charset=utf8'
+        )
+        response['Content-Disposition'] = 'attachment; filename=shopping_cart.txt'
+        return response
+
+    def add_to_shopping_cart(self, request, recipe, shopping_cart):
+        if shopping_cart.recipes.filter(pk__in=(recipe.pk,)).exists():
+            return Response(
+                {'SHOPPING_CART_RECIPE_CANNOT_ADDED_TWICE'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        shopping_cart.recipes.add(recipe)
+        serializer = self.get_serializer(recipe)
+        return Response(
+            serializer.data,
+            status=status.HTTP_201_CREATED,
+        )
+
+    def remove_from_shopping_cart(self, request, recipe, shopping_cart):
+        if not shopping_cart.recipes.filter(pk__in=(recipe.pk,)).exists():
+            return Response(
+                {'SHOPPING_CART_RECIPE_CANNOT_DELETE'},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        shopping_cart.recipes.remove(recipe)
+        return Response(
+            status=status.HTTP_204_NO_CONTENT,
+        )
+
+    @action(methods=('post', 'delete',), detail=True)
+    def shopping_cart(self, request, pk=None):
+        recipe = get_object_or_404(Recipe, pk=pk)
+        shopping_cart = (
+            ShoppingCart.objects.get_or_create(user=request.user)[0]
+        )
+        if request.method == 'POST':
+            return self.add_to_shopping_cart(request, recipe, shopping_cart)
+        return self.remove_from_shopping_cart(request, recipe, shopping_cart)
 
 
 class ShoppingCartViewSet(viewsets.GenericViewSet):

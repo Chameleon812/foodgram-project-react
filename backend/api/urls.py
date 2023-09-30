@@ -5,7 +5,7 @@ from drf_spectacular.views import (
 from rest_framework.routers import DefaultRouter
 
 from .views import (RecipeViewSet,
-                    ShoppingCartViewSet, IngredientView, TagView, FollowApiView,
+                    IngredientView, TagView, FollowApiView,
                     FollowListApiView)
 
 app_name = 'api'
