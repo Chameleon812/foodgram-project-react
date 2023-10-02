@@ -107,10 +107,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
-        if request is None or request.user.is_anonymous:
-            return False
         user = request.user
-        return ShoppingCart.objects.filter(recipe=obj, user=user).exists()
+        try:
+            return (
+                user.is_authenticated and
+                user.shopping_cart.recipes.filter(pk__in=(obj.pk,)).exists()
+            )
+        except ShoppingCart.DoesNotExist:
+            return False
 
 
 class RecipeImageSerializer(serializers.ModelSerializer):
