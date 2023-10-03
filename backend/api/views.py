@@ -102,18 +102,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return self.add_to_favorite(request, recipe)
         return self.delete_from_favorite(request, recipe)
 
-    @action(
-        methods=('get',),
-        detail=False,
-        permission_classes=(IsAuthenticated,)
-    )
-    def favorites(self, request):
-        queryset = Recipe.objects.all()
-        serialized_data = RecipeSerializer(queryset, many=True, context={'request': request}).data
-        favorited_recipes = [item for item in serialized_data if item['is_favorited']]
-
-        return Response(favorited_recipes, status=status.HTTP_200_OK)
-
     def generate_shopping_cart_data(self, request):
         recipes = (
             request.user.shopping_cart.recipes.prefetch_related('ingredients')
