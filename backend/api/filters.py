@@ -38,7 +38,7 @@ class RecipeFilter(filters.FilterSet):
         return queryset.filter(
             pk__in=(recipe.pk for recipe in recipes)
         )
-
+ 
 
 class IngredientFilter(filters.FilterSet):
     name = filters.CharFilter(field_name="name", lookup_expr='icontains')
