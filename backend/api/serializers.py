@@ -117,15 +117,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
 
 
-class RecipeImageSerializer(serializers.ModelSerializer):
-    image = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Recipe
-        fields = ('id', 'name', 'image', 'cooking_time')
-
-
-class RecipeShortReadSerializer(serializers.ModelSerializer):
+class RecipeShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time',)
@@ -263,7 +255,7 @@ class FollowListSerializer(serializers.ModelSerializer):
     def get_recipes(self, obj):
         recipes = obj.recipes.all()[:3]
         request = self.context.get('request')
-        return RecipeImageSerializer(
+        return RecipeShortSerializer(
             recipes, many=True,
             context={'request': request}
         ).data

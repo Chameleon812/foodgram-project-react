@@ -14,7 +14,7 @@ from rest_framework.decorators import action
 from users.models import CustomUser, Follow
 from recipes.models import (
     Tag, Ingredient, Recipe,
-    Favorite, ShoppingCart
+    Favorite, ShoppingCart, RecipeIngredient
 )
 
 from .serializers import (
@@ -22,7 +22,7 @@ from .serializers import (
     RecipeSerializer, RecipeFullSerializer,
     UserFollowSerializer,
     CurrentUserSerializer,
-    RecipeShortReadSerializer
+    RecipeShortSerializer
 )
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsOwnerOrReadOnly
@@ -54,8 +54,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class.page_size = 6
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
-    NAME = 'ingredients__ingredient__name'
-    MEASUREMENT_UNIT = 'ingredients__ingredient__measurement_unit'
+    NAME = 'ingredients__ingredients_in_recipe__name'
+    MEASUREMENT_UNIT = 'ingredients__ingredients_in_recipe__measurement_unit'
 
     def get_serializer_class(self):
         if self.request.method not in ('POST', 'PUT', 'PATCH'):
@@ -75,7 +75,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 {'error'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
-        serializer = RecipeShortReadSerializer(recipe)
+        serializer = RecipeShortSerializer(recipe)
         return Response(
             serializer.data,
             status=status.HTTP_201_CREATED,
@@ -103,23 +103,21 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return self.delete_from_favorite(request, recipe)
 
     def generate_shopping_cart_data(self, request):
-        recipes = (
-            request.user.shopping_cart.recipes.prefetch_related('ingredients')
-        )
-        return (
-            recipes.order_by(self.NAME)
-            .values(self.NAME, self.MEASUREMENT_UNIT)
-            .annotate(total=Sum('ingredients__amount'))
-        )
+        ingredients = RecipeIngredient.objects.filter(
+            recipe__in_shopping_cart__user=request.user
+        ).order_by('ingredient__name').values(
+            'ingredient__name', 'ingredient__measurement_unit'
+        ).annotate(amount=Sum('amount'))
+        print(ingredients)
+        return ingredients
 
     def generate_ingredients_content(self, ingredients):
-        content = ''
+        content = 'Shopping list:'
         for ingredient in ingredients:
             content += (
-                f'{ingredient[self.NAME]}'
-                f' ({ingredient[self.MEASUREMENT_UNIT]})'
-                f' — {ingredient["total"]}\r\n'
-            )
+                f"\n{ingredient['ingredient__name']} "
+                f"({ingredient['ingredient__measurement_unit']}) - "
+                f"{ingredient['amount']}")
         return content
 
     @action(detail=False)

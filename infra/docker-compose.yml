@@ -31,7 +31,7 @@ services:
     frontend:
         image: chameleon812/infra_frontend_1:latest
         volumes:
-            - frontend/:/app/build
+            - frontend:/app/build
         depends_on:
             - db
             - backend
