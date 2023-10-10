@@ -243,14 +243,12 @@ class FollowListSerializer(serializers.ModelSerializer):
             'is_subscribed', 'recipes', 'recipes_count'
         )
 
-    def get_is_subscribed(self, user):
-        current_user = self.context.get('current_user')
-        other_user = user.following.all()
-        if user.is_anonymous:
+    def get_is_subscribed(self, obj):
+        request = self.context.get('request')
+        if request is None or request.user.is_anonymous:
             return False
-        if other_user.count() == 0:
-            return False
-        return Follow.objects.filter(user=user, following=current_user).exists()
+        user = request.user
+        return Follow.objects.filter(following=obj, user=user).exists()
 
     def get_recipes(self, obj):
         recipes = obj.recipes.all()[:3]

@@ -22,7 +22,7 @@ from .serializers import (
     RecipeSerializer, RecipeFullSerializer,
     UserFollowSerializer,
     CurrentUserSerializer,
-    RecipeShortSerializer
+    RecipeShortSerializer, FollowListSerializer
 )
 from .filters import IngredientFilter, RecipeFilter
 from .permissions import IsOwnerOrReadOnly
@@ -213,7 +213,10 @@ class FollowListApiView(generics.ListAPIView):
 
     def get(self, request):
         queryset = CustomUser.objects.all()
-        serialized_data = CurrentUserSerializer(queryset, many=True, context={'request': request}).data
+        print(queryset)
+        serialized_data = FollowListSerializer(queryset, many=True, context={'request': request}).data
+        print(serialized_data)
         subscriptions = [item for item in serialized_data if item['is_subscribed']]
+        print(subscriptions)
 
         return Response(subscriptions, status=status.HTTP_200_OK)
