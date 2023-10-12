@@ -21,12 +21,12 @@ class RecipeFilter(filters.FilterSet):
         fields = ('tags', 'author', 'is_favorited', 'is_in_shopping_cart')
 
     def get_is_favorited(self, queryset, name, value):
-        print(queryset)
-        user = self.request.user
-        if value and not user.is_anonymous:
-            print(queryset.filter(favorites__user=user))
-            return queryset.filter(favorites__user=user)
-        return queryset
+        if not value:
+            return queryset
+        favorites = self.request.user.favorites.all()
+        return queryset.filter(
+            pk__in=(favorite.recipe.pk for favorite in favorites)
+        )
 
     def get_is_in_shopping_cart(self, queryset, name, value):
         if not value:
