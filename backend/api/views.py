@@ -183,39 +183,51 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-class FollowApiView(APIView):
-    permission_classes = [IsAuthenticated, ]
-    pagination_class = PageNumberPagination
-    pagination_class.page_size = 6
-
-    def post(self, request, following_id):
+    def create_subscribe(self, request, id):
         user = request.user
-        data = {
-            'following': following_id,
-            'user': user.id
-        }
-        serializer = UserFollowSerializer(data=data,
-                                          context={'request': request})
+        author = get_object_or_404(User, pk=id)
+        serializer = UserFollowSerializer(author, data=request.data, context={'request': request})
         serializer.is_valid(raise_exception=True)
-        serializer.save()
+        Follow.objects.create(user=user, author=author)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def delete(self, request, following_id):
+    
+    def delete_subscribe(self, request, id):
         user = request.user
-        following = get_object_or_404(CustomUser, id=following_id)
-        Follow.objects.filter(user=user, following=following).delete()
+        author = get_object_or_404(User, pk=id)
+        get_object_or_404(Follow, user=user, author=author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
+    @action(
+        detail=True,
+        methods=['post', 'delete'],
+        permission_classes=[IsAuthenticated],
+    )
+    def subscribe(self, request, pk):
+        print('gig')
+        user = request.user
+        following = get_object_or_404(CustomUser, id=pk)
 
-class FollowListApiView(viewsets.ModelViewSet):
-    permission_classes = [IsAuthenticated, ]
-    serializer_class = FollowListSerializer
-    pagination_class = PageNumberPagination
-    pagination_class.page_size = 6
+        if request.method == 'POST':
+            data = {
+                'following': pk,
+                'user': user.id
+            }
+            serializer = UserFollowSerializer(data=data,
+                                            context={'request': request})
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
 
-    def get_queryset(self, request):
-        users = CustomUser.objects.all()
-        serialized_data = self.get_serializer(users, many=True, context={'request': request}).data
-        queryset = [item for item in serialized_data if item['is_subscribed']]
-        return queryset
+        if request.method == 'DELETE':
+            Follow.objects.filter(user=user, following=following).delete()
+            return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, permission_classes=[IsAuthenticated])
+    def subscriptions(self, request):
+        user = request.user
+        queryset = User.objects.filter(following__user=user)
+        pages = self.paginate_queryset(queryset)
+        serializer = FollowListSerializer(
+            pages, many=True, context={'request': request}
+        )
+        return self.get_paginated_response(serializer.data)
