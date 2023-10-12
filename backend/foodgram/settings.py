@@ -38,7 +38,7 @@ DJOSER = {
     'PASSWORD_RESET_CONFIRM_URL': 'set_password/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': False,
     'SERIALIZERS': {
-        'user_create': "api.serializers.UserCreateSerializer",
+        'user_create': 'api.serializers.CurrentUserSerializer',
         'user': 'api.serializers.CurrentUserSerializer',
         'current_user': 'api.serializers.CurrentUserSerializer',
     },
