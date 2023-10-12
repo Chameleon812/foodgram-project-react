@@ -54,8 +54,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class.page_size = 6
     filter_backends = [DjangoFilterBackend, ]
     filterset_class = RecipeFilter
-    NAME = 'ingredients__ingredients_in_recipe__name'
-    MEASUREMENT_UNIT = 'ingredients__ingredients_in_recipe__measurement_unit'
 
     def get_serializer_class(self):
         if self.request.method not in ('POST', 'PUT', 'PATCH'):
@@ -188,6 +186,8 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class FollowApiView(APIView):
     permission_classes = [IsAuthenticated, ]
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 6
 
     def post(self, request, following_id):
         user = request.user
@@ -208,15 +208,14 @@ class FollowApiView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class FollowListApiView(generics.ListAPIView):
+class FollowListApiView(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, ]
+    serializer_class = FollowListSerializer
+    pagination_class = PageNumberPagination
+    pagination_class.page_size = 6
 
-    def get(self, request):
-        queryset = CustomUser.objects.all()
-        print(queryset)
-        serialized_data = FollowListSerializer(queryset, many=True, context={'request': request}).data
-        print(serialized_data)
-        subscriptions = [item for item in serialized_data if item['is_subscribed']]
-        print(subscriptions)
-
-        return Response(subscriptions, status=status.HTTP_200_OK)
+    def get_queryset(self, request):
+        users = CustomUser.objects.all()
+        serialized_data = self.get_serializer(users, many=True, context={'request': request}).data
+        queryset = [item for item in serialized_data if item['is_subscribed']]
+        return queryset

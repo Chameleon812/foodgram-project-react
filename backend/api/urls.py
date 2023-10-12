@@ -29,7 +29,7 @@ urlpatterns = [
     ),
     path(
         'users/subscriptions/',
-        FollowListApiView.as_view(),
+        FollowListApiView.as_view({'get': 'list'}),
         name='follow_list'
     ),
     path('', include(router.urls)),
