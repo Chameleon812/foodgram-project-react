@@ -183,27 +183,12 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(self.request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def create_subscribe(self, request, id):
-        user = request.user
-        author = get_object_or_404(User, pk=id)
-        serializer = UserFollowSerializer(author, data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        Follow.objects.create(user=user, author=author)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-    
-    def delete_subscribe(self, request, id):
-        user = request.user
-        author = get_object_or_404(User, pk=id)
-        get_object_or_404(Follow, user=user, author=author).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
     @action(
         detail=True,
         methods=['post', 'delete'],
         permission_classes=[IsAuthenticated],
     )
     def subscribe(self, request, pk):
-        print('gig')
         user = request.user
         following = get_object_or_404(CustomUser, id=pk)
 

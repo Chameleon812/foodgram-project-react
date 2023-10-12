@@ -1,3 +1,4 @@
+from djoser.serializers import UserCreateSerializer
 from django.db import transaction
 from django.contrib.auth import get_user_model
 from drf_extra_fields.fields import Base64ImageField
@@ -76,6 +77,15 @@ class CurrentUserSerializer(serializers.ModelSerializer):
             return False
         user = request.user
         return Follow.objects.filter(following=obj, user=user).exists()
+
+
+class UserCreateSerializer(UserCreateSerializer):
+
+    class Meta:
+        model = User
+        fields = (
+            'email', 'username', 'first_name',
+            'last_name', 'password')
 
 
 class RecipeSerializer(serializers.ModelSerializer):
