@@ -1,4 +1,5 @@
-import django_filters as filters
+import django_filters.rest_framework as filters
+
 
 from recipes.models import Recipe, Ingredient, Tag, ShoppingCart
 
@@ -24,6 +25,10 @@ class RecipeFilter(filters.FilterSet):
         if not value:
             return queryset
         favorites = self.request.user.favorites.all()
+        print(queryset)
+        print(favorites)
+        print(queryset.filter(
+            pk__in=(favorite.recipe.pk for favorite in favorites)))
         return queryset.filter(
             pk__in=(favorite.recipe.pk for favorite in favorites)
         )
