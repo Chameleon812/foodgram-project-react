@@ -25,10 +25,6 @@ class RecipeFilter(filters.FilterSet):
         if not value:
             return queryset
         favorites = self.request.user.favorites.all()
-        print(queryset)
-        print(favorites)
-        print(queryset.filter(
-            pk__in=(favorite.recipe.pk for favorite in favorites)))
         return queryset.filter(
             pk__in=(favorite.recipe.pk for favorite in favorites)
         )
