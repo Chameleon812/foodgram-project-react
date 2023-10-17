@@ -5,7 +5,7 @@ Authorized users can subscribe to authors they like, add recipes to favorites, t
 
 
 ## Technology stack
-Python 3.9.7, Django 4.2, Django REST Framework 3.14, PostgresQL, Docker, Yandex.Cloud.
+Python 3.9, Django 4.2, Django REST Framework 3.14, PostgresQL, Docker, Yandex.Cloud.
 
 ## Installation
 To run locally, create a `.env` file in the `/backend/` directory with the following content:
