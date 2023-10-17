@@ -3,11 +3,9 @@ Service for publishing and sharing recipes.
 
 Authorized users can subscribe to authors they like, add recipes to favorites, to purchases, and download a shopping list. Unauthorized users have access to registration, authorization, and viewing recipes of other users.
 
-![Foodgram Workflow](https://github.com/Chameleon812/foodgram-project-react/actions/workflows/main.yaml/badge.svg)
-
 
 ## Technology stack
-Python 3.9.7, Django 4.2, Django REST Framework 3.14, PostgresQL, Docker, Yandex.Cloud.
+Python 3.9, Django 4.2, Django REST Framework 3.14, PostgresQL, Docker, Yandex.Cloud.
 
 ## Installation
 To run locally, create a `.env` file in the `/backend/` directory with the following content:
