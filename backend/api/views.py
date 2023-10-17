@@ -129,9 +129,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response = HttpResponse(
             content, content_type='text/plain,charset=utf8'
         )
-        response[
-            'Content-Disposition'
-            ] = 'attachment; filename=shopping_cart.txt'
+        response['Content-Disposition'] = (
+            'attachment; filename=shopping_cart.txt'
+        )
         return response
 
     def add_to_shopping_cart(self, request, recipe, shopping_cart):

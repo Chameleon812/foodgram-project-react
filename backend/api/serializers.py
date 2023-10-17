@@ -117,10 +117,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = request.user
         try:
             return (
-                user.is_authenticated
-                and user.shopping_cart.recipes.filter(
+                user.is_authenticated and
+                user.shopping_cart.recipes.filter(
                     pk__in=(obj.pk,)
-                    ).exists()
+                ).exists()
             )
         except ShoppingCart.DoesNotExist:
             return False
