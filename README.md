@@ -3,7 +3,7 @@ Service for publishing and sharing recipes.
 
 Authorized users can subscribe to authors they like, add recipes to favorites, to purchases, and download a shopping list. Unauthorized users have access to registration, authorization, and viewing recipes of other users.
 
-![Foodgram Workflow](https://github.com/Chameleon812/foodgram-project-react/actions/workflows/main.yaml/badge.svg)
+![Foodgram Workflow](https://github.com/chameleon812/foodgram-project-react/actions/workflows/main.yaml/badge.svg)
 
 
 ## Technology stack
