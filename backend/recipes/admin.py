@@ -7,7 +7,7 @@ from recipes.models import (Ingredient, Recipe, Tag,
 
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
-    """Конфигурация для модели Tag в админке."""
+    """Configuration for the Tag model in the admin panel."""
     list_display = ('name', 'slug', 'color',)
     list_editable = ('color',)
     list_filter = ('name', 'slug',)
@@ -17,7 +17,7 @@ class TagAdmin(admin.ModelAdmin):
 
 @admin.register(Ingredient)
 class IngredientAdmin(admin.ModelAdmin):
-    """Конфигурация для модели Ingredient в админке."""
+    """Configuration for the Ingredient model in the admin panel."""
     list_display = ('name', 'measurement_unit',)
     list_filter = ('name',)
     search_fields = ('name',)
@@ -25,14 +25,14 @@ class IngredientAdmin(admin.ModelAdmin):
 
 
 class RecipeIngredientInline(admin.TabularInline):
-    """Класс inline для ингридиентов рецепта."""
+    """Inline class for recipe ingredients."""
     model = Recipe.ingredients.through
     extra = 1
 
 
 @admin.register(Recipe)
 class RecipeAdmin(admin.ModelAdmin):
-    """Конфигурация для модели Recipe в админке."""
+    """Configuration for the Recipe model in the admin panel."""
     list_display = ('name', 'author',)
     list_filter = ('author', 'name', 'tags')
     search_fields = ('name',)

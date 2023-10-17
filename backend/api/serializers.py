@@ -181,11 +181,11 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError({
-                    'ingredients': ('Число игредиентов должно быть больше 0')
+                    'ingredients': ('The number of ingredients must be greater than 0')
                 })
             if ingredients.count(ingredient) > 1:
                 raise serializers.ValidationError({
-                    'ingredients': ('Ингридиент повторяется')
+                    'ingredients': ('Ingredient is repeated')
                 })
         return data
 
@@ -218,7 +218,7 @@ class UserFollowSerializer(serializers.ModelSerializer):
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
                 fields=('user', 'following'),
-                message='Такая подписка уже существует'
+                message='This subscription already exists'
             )
         ]
 
@@ -226,7 +226,7 @@ class UserFollowSerializer(serializers.ModelSerializer):
         if (data['user'] == data['following']
                 and self.context['request'].method == 'POST'):
             raise serializers.ValidationError(
-                'Нельзя подписаться на самого себя'
+                "You can't subscribe to yourself"
             )
         return data
 

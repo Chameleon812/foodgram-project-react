@@ -5,8 +5,7 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import HttpResponse, get_object_or_404
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework import status, viewsets, generics
-from rest_framework.views import APIView
+from rest_framework import status, viewsets
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -137,7 +136,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def add_to_shopping_cart(self, request, recipe, shopping_cart):
         if shopping_cart.recipes.filter(pk__in=(recipe.pk,)).exists():
             return Response(
-                {'SHOPPING_CART_RECIPE_CANNOT_ADDED_TWICE'},
+                {'RECIPE_CANNOT_ADDED_TWICE'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         shopping_cart.recipes.add(recipe)
@@ -150,7 +149,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def remove_from_shopping_cart(self, request, recipe, shopping_cart):
         if not shopping_cart.recipes.filter(pk__in=(recipe.pk,)).exists():
             return Response(
-                {'SHOPPING_CART_RECIPE_CANNOT_DELETE'},
+                {'RECIPE_CANNOT_DELETE'},
                 status=status.HTTP_400_BAD_REQUEST,
             )
         shopping_cart.recipes.remove(recipe)
