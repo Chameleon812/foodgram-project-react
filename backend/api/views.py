@@ -3,7 +3,6 @@ from django.db.models import Sum
 from django.contrib.auth import get_user_model
 from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import HttpResponse, get_object_or_404
-from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework import status, viewsets
 from rest_framework.pagination import PageNumberPagination
@@ -130,7 +129,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         response = HttpResponse(
             content, content_type='text/plain,charset=utf8'
         )
-        response['Content-Disposition'] = 'attachment; filename=shopping_cart.txt'
+        response[
+            'Content-Disposition'
+            ] = 'attachment; filename=shopping_cart.txt'
         return response
 
     def add_to_shopping_cart(self, request, recipe, shopping_cart):
@@ -197,7 +198,7 @@ class UserViewSet(viewsets.ModelViewSet):
                 'user': user.id
             }
             serializer = UserFollowSerializer(data=data,
-                                            context={'request': request})
+                                              context={'request': request})
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)

@@ -117,8 +117,10 @@ class RecipeSerializer(serializers.ModelSerializer):
         user = request.user
         try:
             return (
-                user.is_authenticated and
-                user.shopping_cart.recipes.filter(pk__in=(obj.pk,)).exists()
+                user.is_authenticated
+                and user.shopping_cart.recipes.filter(
+                    pk__in=(obj.pk,)
+                    ).exists()
             )
         except ShoppingCart.DoesNotExist:
             return False
@@ -181,7 +183,7 @@ class RecipeFullSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError({
-                    'ingredients': ('The number of ingredients must be greater than 0')
+                    'ingredients': ('The number must be greater than 0')
                 })
             if ingredients.count(ingredient) > 1:
                 raise serializers.ValidationError({

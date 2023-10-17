@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, validate_slug
 from django.db.models import (Model, CharField, SlugField, UniqueConstraint,
                               DateTimeField, ImageField, TextField,
-                              PositiveSmallIntegerField, ManyToManyField, OneToOneField,
-                              ForeignKey, CASCADE)
+                              PositiveSmallIntegerField, ManyToManyField,
+                              OneToOneField, ForeignKey, CASCADE)
 from django.utils import timezone
 
 from api.validators import (validate_hex)
@@ -130,9 +130,8 @@ class Favorite(Model):
 
     class Meta:
         verbose_name = 'Favorite'
-        constraints = [
-            UniqueConstraint(fields=['recipe', 'user'], name='favorite_unique')
-            ]
+        constraints = [UniqueConstraint(fields=['recipe', 'user'],
+                                        name='favorite_unique')]
 
     def __str__(self):
         return f"{self.user} has favorites: {self.recipe.name}"
