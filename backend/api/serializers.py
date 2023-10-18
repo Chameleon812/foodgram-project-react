@@ -180,6 +180,7 @@ class RecipeFullSerializer(serializers.ModelSerializer):
 
     def validate(self, data):
         ingredients = data.get('ingredients')
+        cooking_time = data.get('cooking_time')
         for ingredient in ingredients:
             if int(ingredient['amount']) <= 0:
                 raise serializers.ValidationError({
@@ -189,6 +190,10 @@ class RecipeFullSerializer(serializers.ModelSerializer):
                 raise serializers.ValidationError({
                     'ingredients': ('Ingredient is repeated')
                 })
+        if cooking_time < 1:
+            raise serializers.ValidationError(
+                'Cooking time should be at least one minute'
+            )
         return data
 
     def to_representation(self, instance):
