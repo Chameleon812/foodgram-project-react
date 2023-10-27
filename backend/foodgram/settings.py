@@ -7,7 +7,7 @@ dotenv_path = os.path.join(BASE_DIR, '.env')
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='111')
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
