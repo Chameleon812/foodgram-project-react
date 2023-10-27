@@ -31,7 +31,7 @@ class TagSerializer(serializers.ModelSerializer):
 
 class RecipeIngredientAmountSerializer(serializers.ModelSerializer):
     id = serializers.PrimaryKeyRelatedField(source='ingredient',
-                                            read_only=True)
+                                            queryset=Ingredient.objects.all())
     name = serializers.SlugRelatedField(slug_field='name',
                                         source='ingredient',
                                         read_only=True)
