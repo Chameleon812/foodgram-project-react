@@ -35,6 +35,7 @@ class IngredientView(viewsets.ReadOnlyModelViewSet):
     queryset = Ingredient.objects.all()
     filter_backends = [DjangoFilterBackend, ]
     filter_class = IngredientFilter
+    search_fields = ('^name', )
     pagination_class = None
 
 
