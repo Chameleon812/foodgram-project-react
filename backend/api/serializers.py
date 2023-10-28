@@ -120,6 +120,7 @@ class RecipeSerializer(serializers.ModelSerializer):
             return False
         return ShoppingCart.objects.filter(user=request.user, recipes__in=[obj])
 
+
 class RecipeShortSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
