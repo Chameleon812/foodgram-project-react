@@ -121,7 +121,8 @@ class Recipe(Model):
 
 class Favorite(Model):
     user = ForeignKey(
-        User, related_name='favorites',
+        User,
+        related_name='favorites',
         on_delete=CASCADE
     )
     recipe = ForeignKey(
@@ -139,10 +140,10 @@ class Favorite(Model):
 
 
 class ShoppingCart(Model):
-    user = OneToOneField(
+    user = ForeignKey(
         User,
-        on_delete=CASCADE,
         related_name='shopping_cart',
+        on_delete=CASCADE,
         verbose_name='User',
     )
     recipes = ManyToManyField(
