@@ -106,17 +106,19 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_in_shopping_cart(self, obj):
         request = self.context.get('request')
-        shopping_cart = ShoppingCart.objects.get(user=request.user)
-        recipes = shopping_cart.recipes.all()
+        if not request or request.user.is_anonymous:
+            return False
         try:
-            return (
-                request.user.is_authenticated
-                and recipes.filter(
-                    pk__in=(obj.pk,)
-                ).exists()
-            )
+            shopping_cart = ShoppingCart.objects.get(user=request.user)
         except ShoppingCart.DoesNotExist:
             return False
+        recipes = shopping_cart.recipes.all()
+        return (
+            request.user.is_authenticated
+            and recipes.filter(
+                pk__in=(obj.pk,)
+            ).exists()
+        )
 
 
 class RecipeShortSerializer(serializers.ModelSerializer):

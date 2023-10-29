@@ -32,7 +32,10 @@ class RecipeFilter(filters.FilterSet):
     def get_is_in_shopping_cart(self, queryset, name, value):
         if not value:
             return queryset
-        shopping_cart = ShoppingCart.objects.get(user=self.request.user)
+        try:
+            shopping_cart = ShoppingCart.objects.get(user=self.request.user)
+        except ShoppingCart.DoesNotExist:
+            return False
         recipes = shopping_cart.recipes.all()
         return queryset.filter(
             pk__in=(recipe.pk for recipe in recipes)
