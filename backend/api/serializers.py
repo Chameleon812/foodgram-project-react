@@ -45,16 +45,6 @@ class RecipeIngredientAmountSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'measurement_unit', 'amount',)
 
 
-class AddToIngredientAmountSerializer(serializers.ModelSerializer):
-    id = serializers.PrimaryKeyRelatedField(source='ingredient',
-                                            queryset=Ingredient.objects.all())
-    amount = serializers.IntegerField()
-
-    class Meta:
-        model = RecipeIngredient
-        fields = ('amount', 'id')
-
-
 class CurrentUserSerializer(serializers.ModelSerializer):
     is_subscribed = serializers.SerializerMethodField()
 
@@ -120,7 +110,7 @@ class RecipeSerializer(serializers.ModelSerializer):
         try:
             return (
                 user.is_authenticated
-                and user.shopping_cart.recipes.filter(
+                and user.in_shopping_cart.recipes.filter(
                     pk__in=(obj.pk,)
                 ).exists()
             )

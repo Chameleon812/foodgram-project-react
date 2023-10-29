@@ -33,7 +33,7 @@ class RecipeFilter(filters.FilterSet):
         if not value:
             return queryset
         recipes = (
-            self.request.user.shopping_cart.recipes.all()
+            self.request.user.in_shopping_cart.recipes.all()
         )
         return queryset.filter(
             pk__in=(recipe.pk for recipe in recipes)
