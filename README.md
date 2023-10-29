@@ -66,6 +66,6 @@ To open the documentation locally, start the server and follow the link:
 [http://127.0.0.1/api/docs/](http://127.0.0.1/api/docs/)
 
 
-The project is running on the server http://158.160.111.124/
+The project is running on the server http://158.160.37.121/
 Admin login: admin@gmail.com
 Admin password: 987654321!
