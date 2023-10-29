@@ -1,7 +1,7 @@
 import django_filters.rest_framework as filters
 from rest_framework.filters import SearchFilter
 
-from recipes.models import Recipe, Ingredient, Tag
+from recipes.models import Recipe, Ingredient, Tag, ShoppingCart
 
 
 class RecipeFilter(filters.FilterSet):
@@ -32,9 +32,8 @@ class RecipeFilter(filters.FilterSet):
     def get_is_in_shopping_cart(self, queryset, name, value):
         if not value:
             return queryset
-        recipes = (
-            self.request.user.in_shopping_cart.recipes.all()
-        )
+        shopping_cart = ShoppingCart.objects.get(user=self.request.user)
+        recipes = shopping_cart.recipes.all()
         return queryset.filter(
             pk__in=(recipe.pk for recipe in recipes)
         )
