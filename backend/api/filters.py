@@ -35,7 +35,7 @@ class RecipeFilter(filters.FilterSet):
         try:
             shopping_cart = ShoppingCart.objects.get(user=self.request.user)
         except ShoppingCart.DoesNotExist:
-            return False
+            return ShoppingCart.objects.none()
         recipes = shopping_cart.recipes.all()
         return queryset.filter(
             pk__in=(recipe.pk for recipe in recipes)
