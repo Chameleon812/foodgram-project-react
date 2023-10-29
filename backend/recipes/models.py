@@ -3,7 +3,7 @@ from django.core.validators import MinValueValidator, validate_slug
 from django.db.models import (Model, CharField, SlugField, UniqueConstraint,
                               DateTimeField, ImageField, TextField,
                               PositiveSmallIntegerField, ManyToManyField,
-                              OneToOneField, ForeignKey, CASCADE)
+                              ForeignKey, CASCADE)
 from django.utils import timezone
 
 from api.validators import (validate_hex)
